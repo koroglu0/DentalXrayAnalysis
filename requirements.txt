@@ -1,7 +1,7 @@
 flask
 flask-cors
 ultralytics
-opencv-python
+opencv-python-headless
 numpy
 pillow
 PyJWT
@@ -12,3 +12,4 @@ google-auth  # Google OAuth token verification için
 google-auth-oauthlib
 google-auth-httplib2
 requests
+gunicorn
