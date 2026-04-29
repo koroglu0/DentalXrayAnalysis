@@ -1,2 +1,2 @@
-[phases.setup]
-aptPkgs = ["libxcb1", "libxkbcommon0", "libgl1"]
+[system]
+packages = ["libxcb", "libxkbcommon"]
