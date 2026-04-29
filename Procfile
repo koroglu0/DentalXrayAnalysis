@@ -1,0 +1,1 @@
+web: cd backend && /app/.venv/bin/gunicorn application:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
