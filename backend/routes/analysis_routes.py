@@ -113,11 +113,13 @@ def get_history(current_user):
         else:
             analyses = AnalysisService.get_user_analyses(user_email)
 
-        # Her analiz için pre-signed URL ekle
+        # Her analiz için pre-signed URL ekle (eski lokal yolları temizle)
         for a in analyses:
-            s3_key = a.get('image_s3_key') or a.get('image_url', '')
+            s3_key = a.get('image_s3_key', '')
             if s3_key and s3_key.startswith('xrays/'):
                 a['image_url'] = s3_service.generate_presigned_url(s3_key)
+            else:
+                a['image_url'] = None  # Eski lokal /uploads/ yollarını geçersiz kıl
 
         return jsonify({'history': analyses}), 200
         
@@ -141,10 +143,12 @@ def get_analysis(current_user, analysis_id):
         if user_role != 'admin' and analysis.get('user_email') != user_email:
             return jsonify({'error': 'Yetkiniz yok'}), 403
 
-        # Pre-signed URL ekle
-        s3_key = analysis.get('image_s3_key') or analysis.get('image_url', '')
+        # Pre-signed URL ekle (eski lokal yolları temizle)
+        s3_key = analysis.get('image_s3_key', '')
         if s3_key and s3_key.startswith('xrays/'):
             analysis['image_url'] = s3_service.generate_presigned_url(s3_key)
+        else:
+            analysis['image_url'] = None
 
         return jsonify({'analysis': analysis}), 200
         
@@ -264,11 +268,13 @@ def get_pending_xrays(current_user):
             # Doktor sadece kendisine gönderilenleri görür
             pending_analyses = AnalysisService.get_pending_analyses_for_doctor(doctor_email)
 
-        # Her pending analiz için pre-signed URL ekle
+        # Her pending analiz için pre-signed URL ekle (eski lokal yolları temizle)
         for a in pending_analyses:
             s3_key = a.get('image_s3_key', '')
             if s3_key and s3_key.startswith('xrays/'):
                 a['image_url'] = s3_service.generate_presigned_url(s3_key)
+            else:
+                a['image_url'] = None
 
         return jsonify({
             'pending_xrays': pending_analyses,
