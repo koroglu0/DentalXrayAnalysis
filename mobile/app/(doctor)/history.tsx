@@ -1,0 +1,93 @@
+import { useState, useEffect } from 'react';
+import { View, Text, ScrollView, ActivityIndicator, TextInput } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import apiClient from '../../src/api/client';
+import { AnalysisCard } from '../../components/ui/AnalysisCard';
+
+interface Analysis {
+  id: string;
+  filename: string;
+  date: string;
+  findings: string[];
+  total_findings: number;
+  status: string;
+}
+
+export default function DoctorHistoryScreen() {
+  const [analyses, setAnalyses] = useState<Analysis[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    apiClient
+      .get('/api/history')
+      .then((res) => setAnalyses(res.data.history || res.data || []))
+      .catch(() => setAnalyses([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = analyses.filter(
+    (a) =>
+      a.filename?.toLowerCase().includes(search.toLowerCase()) ||
+      a.id?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#13a4ec" />
+      </View>
+    );
+  }
+
+  return (
+    <SafeAreaView className="flex-1 bg-slate-50">
+      {/* Header */}
+      <View className="bg-white border-b border-slate-200 px-4 py-3 flex-row items-center justify-between">
+        <View className="w-8 h-8 bg-blue-500 rounded-lg items-center justify-center">
+          <Text className="text-white text-xs font-bold">AI</Text>
+        </View>
+        <Text className="font-bold text-slate-900">AI Dental Analysis</Text>
+        <View className="w-8" />
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: 16 }}>
+        <Text className="text-3xl font-bold text-slate-900 mb-1">Analiz Geçmişim</Text>
+        <Text className="text-slate-500 text-sm mb-5">
+          Daha önce yüklediğiniz röntgenleri ve analiz sonuçlarını görüntüleyin.
+        </Text>
+
+        {/* Arama */}
+        <View className="flex-row items-center bg-white border border-slate-200 rounded-xl px-3 py-3 mb-5 shadow-sm">
+          <Text className="text-slate-400 mr-2">🔍</Text>
+          <TextInput
+            className="flex-1 text-slate-900 text-sm"
+            placeholder="Dosya adına göre ara"
+            placeholderTextColor="#94a3b8"
+            value={search}
+            onChangeText={setSearch}
+          />
+        </View>
+
+        {filtered.length === 0 ? (
+          <View className="items-center py-16">
+            <Text className="text-5xl mb-4">🦷</Text>
+            <Text className="text-slate-500 text-sm text-center">Henüz analiz yok</Text>
+          </View>
+        ) : (
+          filtered.map((analysis) => (
+            <AnalysisCard
+              key={analysis.id}
+              id={analysis.id}
+              filename={analysis.filename}
+              date={analysis.date}
+              findings={analysis.findings || []}
+              totalFindings={analysis.total_findings || 0}
+              status={analysis.status}
+            />
+          ))
+        )}
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

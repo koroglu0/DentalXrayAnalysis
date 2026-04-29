@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { config } from '../config';
 
 export default function HistoryPage() {
   const navigate = useNavigate();
@@ -14,10 +15,19 @@ export default function HistoryPage() {
 
   const fetchHistory = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/history');
+      // Token'ı al
+      const token = localStorage.getItem('token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${config.apiBaseUrl}/api/history`, {
+        headers: headers
+      });
       if (response.ok) {
         const data = await response.json();
-        setAnalyses(data);
+        setAnalyses(data.history || []);
       }
     } catch (error) {
       console.error('Geçmiş yüklenirken hata:', error);
@@ -33,7 +43,6 @@ export default function HistoryPage() {
 
   const handleAnalysisClick = async (analysis) => {
     try {
-      const imageUrl = `http://localhost:5000/uploads/${analysis.filename}`;
       navigate('/result', { 
         state: { 
           result: {
@@ -42,7 +51,7 @@ export default function HistoryPage() {
             timestamp: analysis.timestamp,
             image_dimensions: analysis.image_dimensions
           }, 
-          imageUrl: imageUrl 
+          imageUrl: analysis.image_url || null
         } 
       });
     } catch (error) {
@@ -138,12 +147,12 @@ export default function HistoryPage() {
               <div
                 className="w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg bg-gray-200 dark:bg-gray-800"
                 style={{ 
-                  backgroundImage: analysis.filename 
-                    ? `url(http://localhost:5000/uploads/${analysis.filename})` 
+                  backgroundImage: analysis.image_url 
+                    ? `url(${analysis.image_url})` 
                     : 'none' 
                 }}
               >
-                {!analysis.filename && (
+                {!analysis.image_url && (
                   <div className="w-full h-full flex items-center justify-center">
                     <span className="material-symbols-outlined text-4xl text-gray-400">
                       image

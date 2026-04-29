@@ -1,13 +1,78 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import { config } from '../config';
 
 export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [pendingAnalysisId, setPendingAnalysisId] = useState(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Rol kontrolü - Hasta ise yönlendir
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    if (user.role === 'patient') {
+      navigate('/patient/upload');
+      return;
+    }
+    
+    // Admin ve Doctor bu sayfayı kullanabilir
+    
+    // Pending röntgen varsa otomatik yükle
+    const pendingXray = localStorage.getItem('pendingXray');
+    if (pendingXray) {
+      try {
+        const xrayData = JSON.parse(pendingXray);
+        console.log('📥 Pending xray loaded:', xrayData);
+        
+        // Analysis ID'yi kaydet
+        if (xrayData.id) {
+          setPendingAnalysisId(xrayData.id);
+          console.log('🆔 Pending analysis ID:', xrayData.id);
+        }
+        
+        // Röntgen görselini S3'ten al
+        const s3Key = xrayData.image_s3_key;
+        if (s3Key) {
+          const token = localStorage.getItem('token');
+          fetch(`${config.apiBaseUrl}/api/analysis/image-url?key=${encodeURIComponent(s3Key)}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (!data.url) throw new Error('URL alınamadı');
+              return fetch(data.url);
+            })
+            .then(response => response.blob())
+            .then(blob => {
+              const file = new File([blob], xrayData.filename, { type: blob.type || 'image/jpeg' });
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                setPreviewUrl(reader.result);
+                setSelectedFile(file);
+              };
+              reader.readAsDataURL(blob);
+            })
+            .catch(error => {
+              console.error('❌ Error loading pending xray image:', error);
+            });
+        }
+        
+        // LocalStorage'dan temizle
+        localStorage.removeItem('pendingXray');
+        
+      } catch (error) {
+        console.error('❌ Error parsing pending xray:', error);
+        localStorage.removeItem('pendingXray');
+      }
+    }
+  }, []);
 
   const handleFileChange = (file) => {
     if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
@@ -54,24 +119,69 @@ export default function UploadPage() {
   const handleAnalyze = async () => {
     if (!selectedFile) return;
     
+    setIsAnalyzing(true);
+    setProgress(0);
+
+    // Simulated progress animation
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) {
+          clearInterval(progressInterval);
+          return 90;
+        }
+        return prev + 10;
+      });
+    }, 200);
+    
     const formData = new FormData();
     formData.append('file', selectedFile);
+    
+    // Eğer pending bir analiz varsa, analysis_id'yi ekle
+    if (pendingAnalysisId) {
+      formData.append('analysis_id', pendingAnalysisId);
+      console.log('🔄 Updating pending analysis:', pendingAnalysisId);
+    }
 
     try {
-      const response = await fetch('http://localhost:5000/api/analyze', {
+      // Token'ı al
+      const token = localStorage.getItem('token');
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${config.apiBaseUrl}/api/analyze`, {
         method: 'POST',
+        headers: headers,
         body: formData,
       });
 
+      clearInterval(progressInterval);
+      setProgress(100);
+
       if (response.ok) {
         const result = await response.json();
-        navigate('/result', { state: { result, imageUrl: previewUrl } });
+        
+        // Pending analysis güncellendiyse, state'i temizle
+        if (pendingAnalysisId) {
+          setPendingAnalysisId(null);
+          console.log('✅ Pending analysis updated and removed from queue');
+        }
+        
+        setTimeout(() => {
+          navigate('/result', { state: { result, imageUrl: previewUrl } });
+        }, 500);
       } else {
         alert('Analiz sırasında bir hata oluştu.');
+        setIsAnalyzing(false);
+        setProgress(0);
       }
     } catch (error) {
       console.error('Error:', error);
+      clearInterval(progressInterval);
       alert('Sunucuya bağlanılamadı.');
+      setIsAnalyzing(false);
+      setProgress(0);
     }
   };
 
@@ -168,10 +278,37 @@ export default function UploadPage() {
               </div>
               <button
                 onClick={handleAnalyze}
-                className="w-full flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors"
+                disabled={isAnalyzing}
+                className="w-full flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="truncate">Analizi Başlat</span>
+                <span className="truncate">
+                  {isAnalyzing ? 'Analiz Ediliyor...' : 'Analizi Başlat'}
+                </span>
               </button>
+              
+              {isAnalyzing && (
+                <div className="w-full max-w-[480px]">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      İlerleme
+                    </span>
+                    <span className="text-sm font-medium text-primary">
+                      {progress}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div 
+                      className="bg-gradient-to-r from-primary to-blue-600 h-3 rounded-full transition-all duration-300 ease-out"
+                      style={{ width: `${progress}%` }}
+                    >
+                      <div className="h-full w-full bg-white/30 animate-pulse"></div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
+                    AI modeliniz görüntüyü analiz ediyor...
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kullanıcı Yönetimi - AI Dental Analysis</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style data-purpose="custom-typography">
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+<!-- BEGIN: MainHeader -->
+<header class="bg-white border-b sticky top-0 z-50 px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-2" data-purpose="logo-container">
+<!-- Using a placeholder for the logo as seen in {{DATA:IMAGE:IMAGE_3}} -->
+<img alt="Logo" class="w-8 h-8 rounded-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3zcFgPjkIHqg71XTqfTKGLyzbSzKLsfMuoOdAa1ySzxFMuCuiyn9_0k_uqRn4dF8D26PepnB4uJZTML3elAnK1Ro__w48A_SbWBu2tyEQo9aHRvYutCzJmo8DxHZBW0ncwu3uE6VbW1r8qz6dUPMWVXwZ3Q9U06tK8uFF29sHTsZF10RqKNBh3Zydw86wInrKUV22tVi-cgEzmjEoeRe1ykdjQWr-eFXo-mJygutm2KSUbR68EmrsrWGE6jo7svaOVrFzFApdRloA"/>
+<span class="font-bold text-lg tracking-tight">AI Dental Analysis</span>
+</div>
+<button class="p-2 text-slate-500" data-purpose="mobile-menu-trigger">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 6h16M4 12h16M4 18h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</header>
+<!-- END: MainHeader -->
+<main class="p-4 space-y-6 pb-20">
+<!-- BEGIN: TitleSection -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<div data-purpose="page-info">
+<h1 class="text-2xl font-bold">Kullanıcı Yönetimi</h1>
+<p class="text-slate-500 text-sm">Tüm kullanıcıları görüntüle ve yönet</p>
+</div>
+</div>
+<div class="flex gap-2" data-purpose="action-buttons">
+<button class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
+<svg class="h-5 w-5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"></path>
+</svg>
+          Yeni Kullanıcı
+        </button>
+<button class="bg-gray-200 hover:bg-gray-300 text-slate-700 font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+          Geri
+        </button>
+</div>
+</section>
+<!-- END: TitleSection -->
+<!-- BEGIN: StatsGrid -->
+<!-- Horizontal scrolling container for stats on mobile -->
+<section class="flex overflow-x-auto gap-3 pb-2 -mx-4 px-4 scrollbar-hide" data-purpose="stats-summary">
+<!-- Toplam Kullanıcı -->
+<div class="min-w-[140px] flex-1 bg-blue-50 border border-blue-100 p-4 rounded-xl">
+<p class="text-blue-600 text-xs font-semibold uppercase">Toplam Kullanıcı</p>
+<p class="text-3xl font-bold mt-1 text-slate-800">3</p>
+</div>
+<!-- Admin -->
+<div class="min-w-[140px] flex-1 bg-red-50 border border-red-100 p-4 rounded-xl">
+<p class="text-red-600 text-xs font-semibold uppercase">Admin</p>
+<p class="text-3xl font-bold mt-1 text-slate-800">1</p>
+</div>
+<!-- Doktor -->
+<div class="min-w-[140px] flex-1 bg-purple-50 border border-purple-100 p-4 rounded-xl">
+<p class="text-purple-600 text-xs font-semibold uppercase">Doktor</p>
+<p class="text-3xl font-bold mt-1 text-slate-800">1</p>
+</div>
+<!-- Hasta -->
+<div class="min-w-[140px] flex-1 bg-emerald-50 border border-emerald-100 p-4 rounded-xl">
+<p class="text-emerald-600 text-xs font-semibold uppercase">Hasta</p>
+<p class="text-3xl font-bold mt-1 text-slate-800">1</p>
+</div>
+</section>
+<!-- END: StatsGrid -->
+<!-- BEGIN: Filters -->
+<section class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-500" for="search">Ara</label>
+<input class="w-full rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 text-sm" id="search" placeholder="İsim veya e-posta..." type="text"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-semibold text-slate-500" for="role-filter">Rol</label>
+<select class="w-full rounded-lg border-gray-300 focus:border-sky-500 focus:ring-sky-500 text-sm" id="role-filter">
+<option>Tümü</option>
+<option>Admin</option>
+<option>Doktor</option>
+<option>Hasta</option>
+</select>
+</div>
+</section>
+<!-- END: Filters -->
+<!-- BEGIN: UserList -->
+<section class="space-y-3" data-purpose="user-results">
+<!-- User Card 1 -->
+<div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="font-bold text-slate-800">AlgenerateHub</h3>
+<p class="text-xs text-slate-500">aigeneratehub288@gmail.com</p>
+</div>
+</div>
+<span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-blue-100 text-blue-700">Doktor</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs border-t border-gray-100 pt-3">
+<div>
+<p class="text-slate-400 font-medium">Organizasyon</p>
+<p class="text-slate-700">dental / Ortodonti</p>
+</div>
+<div>
+<p class="text-slate-400 font-medium">Durum</p>
+<span class="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">Aktif</span>
+</div>
+<div class="mt-2">
+<p class="text-slate-400 font-medium">Kayıt Tarihi</p>
+<p class="text-slate-700">13.12.2025</p>
+</div>
+<div class="mt-2 flex items-end justify-end gap-3">
+<button aria-label="Düzenle" class="text-blue-500 p-1">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button aria-label="Engelle" class="text-orange-500 p-1">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button aria-label="Sil" class="text-red-500 p-1">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</div>
+<!-- User Card 2 -->
+<div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="font-bold text-slate-800">Mert Köroğlu</h3>
+<p class="text-xs text-slate-500">mertkrgl02@gmail.com</p>
+</div>
+</div>
+<span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-red-100 text-red-700">Admin</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs border-t border-gray-100 pt-3">
+<div>
+<p class="text-slate-400 font-medium">Organizasyon</p>
+<p class="text-slate-400 italic">Atanmamış</p>
+</div>
+<div>
+<p class="text-slate-400 font-medium">Durum</p>
+<span class="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">Aktif</span>
+</div>
+<div class="mt-2">
+<p class="text-slate-400 font-medium">Kayıt Tarihi</p>
+<p class="text-slate-700">01.01.2026</p>
+</div>
+<div class="mt-2 flex items-end justify-end gap-3">
+<button class="text-blue-500 p-1">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="text-orange-500 p-1">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="text-red-500 p-1">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</div>
+<!-- User Card 3 -->
+<div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div>
+<h3 class="font-bold text-slate-800">mert krgl</h3>
+<p class="text-xs text-slate-500">215541025@firat.edu.tr</p>
+</div>
+</div>
+<span class="px-2.5 py-0.5 rounded text-[10px] font-bold uppercase bg-emerald-100 text-emerald-700">Hasta</span>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs border-t border-gray-100 pt-3">
+<div>
+<p class="text-slate-400 font-medium">Organizasyon</p>
+<p class="text-slate-400 italic">Atanmamış</p>
+</div>
+<div>
+<p class="text-slate-400 font-medium">Durum</p>
+<span class="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">Aktif</span>
+</div>
+<div class="mt-2">
+<p class="text-slate-400 font-medium">Kayıt Tarihi</p>
+<p class="text-slate-700">13.12.2025</p>
+</div>
+<div class="mt-2 flex items-end justify-end gap-3">
+<button class="text-blue-500 p-1">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="text-orange-500 p-1">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="text-red-500 p-1">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- END: UserList -->
+</main>
+<!-- BEGIN: BottomNav -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 flex justify-around items-center" data-purpose="bottom-navigation">
+<button class="flex flex-col items-center gap-1 text-sky-500">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium">Dashboard</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium">Analizler</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="text-[10px] font-medium">Çıkış</span>
+</button>
+</nav>
+<!-- END: BottomNav -->
+<style data-purpose="mobile-optimizations">
+    /* Hide scrollbar for the horizontal stats scroll */
+    .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+    }
+    .scrollbar-hide {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    
+    /* Active state for bottom nav */
+    nav button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</body></html>
