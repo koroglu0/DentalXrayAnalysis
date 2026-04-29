@@ -1,7 +1,6 @@
 flask
 flask-cors
 ultralytics
-opencv-python-headless
 numpy
 pillow
 PyJWT
@@ -13,3 +12,4 @@ google-auth-oauthlib
 google-auth-httplib2
 requests
 gunicorn
+opencv-python-headless
