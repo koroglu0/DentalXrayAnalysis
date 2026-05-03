@@ -18,6 +18,7 @@ export default function PatientUploadPage() {
   const [joinCode, setJoinCode] = useState('');
   const [joinLoading, setJoinLoading] = useState(false);
   const [myOrganization, setMyOrganization] = useState(null);
+  const [unreadFeedbackCount, setUnreadFeedbackCount] = useState(0);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -32,7 +33,23 @@ export default function PatientUploadPage() {
     }
     
     fetchOrganizations();
+    fetchUnreadFeedbackCount();
   }, []);
+
+  const fetchUnreadFeedbackCount = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${config.apiBaseUrl}/api/feedbacks/unread-count`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadFeedbackCount(data.unread_count || 0);
+      }
+    } catch {
+      setUnreadFeedbackCount(0);
+    }
+  };
 
   const fetchMyOrganization = async (orgId) => {
     if (!orgId) { setMyOrganization(null); return; }
@@ -282,6 +299,26 @@ export default function PatientUploadPage() {
               Diş röntgeninizi doktorunuza gönderin
             </p>
           </div>
+
+          {unreadFeedbackCount > 0 && (
+            <button
+              onClick={() => navigate('/patient/notifications')}
+              className="w-full mb-6 bg-cyan-500 hover:bg-cyan-600 text-white rounded-2xl p-4 text-left transition-colors"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined">notifications</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-sm">{unreadFeedbackCount} yeni doktor geri bildirimi</p>
+                    <p className="text-white/90 text-xs">Bildirim detayına girip randevu alabilirsiniz</p>
+                  </div>
+                </div>
+                <span className="material-symbols-outlined shrink-0">chevron_right</span>
+              </div>
+            </button>
+          )}
 
           {/* Klinik Bağlantısı */}
           <div className="bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl p-6 mb-6">

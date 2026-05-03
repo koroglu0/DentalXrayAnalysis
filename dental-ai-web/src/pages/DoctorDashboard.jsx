@@ -215,16 +215,16 @@ export default function DoctorDashboard() {
   };
 
   const handleAnalyzePending = (analysis) => {
-    // Pending röntgeni localStorage'a kaydet ve upload sayfasına yönlendir
-    localStorage.setItem('pendingXray', JSON.stringify({
-      id: analysis.id,
-      filename: analysis.filename,
-      patient_note: analysis.patient_note,
-      patient_email: analysis.user_email,
-      image_s3_key: analysis.image_s3_key,
-      image_url: analysis.image_url
-    }));
-    navigate('/');
+    navigate('/doctor/analyze-pending', {
+      state: {
+        id: analysis.id,
+        filename: analysis.filename,
+        patient_note: analysis.patient_note,
+        patient_email: analysis.user_email,
+        image_s3_key: analysis.image_s3_key,
+        image_url: analysis.image_url,
+      },
+    });
   };
 
   const getScanTypeIcon = (type) => {
@@ -291,6 +291,10 @@ export default function DoctorDashboard() {
               <a onClick={() => navigate('/history')} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group cursor-pointer">
                 <span className="material-symbols-outlined group-hover:text-slate-900 dark:group-hover:text-white">analytics</span>
                 <p className="text-sm font-medium leading-normal group-hover:text-slate-900 dark:group-hover:text-white">Analizler</p>
+              </a>
+              <a onClick={() => navigate('/doctor/appointments')} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors group cursor-pointer">
+                <span className="material-symbols-outlined group-hover:text-slate-900 dark:group-hover:text-white">calendar_month</span>
+                <p className="text-sm font-medium leading-normal group-hover:text-slate-900 dark:group-hover:text-white">Randevular</p>
               </a>
             </nav>
           </div>

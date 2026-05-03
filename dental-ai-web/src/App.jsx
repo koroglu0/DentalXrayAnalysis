@@ -12,6 +12,11 @@ import UserManagement from './pages/UserManagement';
 import PatientManagement from './pages/PatientManagement';
 import AuthCallback from './pages/AuthCallback';
 import CompleteProfilePage from './pages/CompleteProfilePage';
+import AppointmentsPage from './pages/AppointmentsPage';
+import PatientAppointmentsPage from './pages/PatientAppointmentsPage';
+import PendingAnalyzePage from './pages/PendingAnalyzePage';
+import PatientNotificationsPage from './pages/PatientNotificationsPage';
+import PatientFeedbackDetailPage from './pages/PatientFeedbackDetailPage';
 
 function App() {
   return (
@@ -32,6 +37,11 @@ function App() {
           <Route path="/admin/users" element={<UserManagement />} />
           <Route path="/admin/patients" element={<PatientManagement />} />
           <Route path="/patient-management" element={<PatientManagement />} />
+          <Route path="/doctor/appointments" element={<AppointmentsPage />} />
+          <Route path="/patient/appointments" element={<PatientAppointmentsPage />} />
+          <Route path="/patient/notifications" element={<PatientNotificationsPage />} />
+          <Route path="/patient/feedback-detail" element={<PatientFeedbackDetailPage />} />
+          <Route path="/doctor/analyze-pending" element={<PendingAnalyzePage />} />
         </Routes>
       </Router>
     </div>

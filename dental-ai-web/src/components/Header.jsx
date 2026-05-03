@@ -73,6 +73,16 @@ export default function Header() {
               Dashboard
             </Link>
           )}
+          {user && user.role === 'patient' && (
+            <>
+              <Link to="/patient/notifications" className="text-gray-600 dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary transition-colors">
+                Bildirimler
+              </Link>
+              <Link to="/patient/appointments" className="text-gray-600 dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary transition-colors">
+                Randevularım
+              </Link>
+            </>
+          )}
           <Link to="/history" className="text-gray-600 dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary transition-colors">
             Geçmiş Analizler
           </Link>
