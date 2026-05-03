@@ -14,8 +14,8 @@ export const awsConfig = {
         oauth: {
           domain: 'dental-ai-app.auth.eu-north-1.amazoncognito.com', // Cognito domain'inizi buraya yazın
           scopes: ['email', 'profile', 'openid'],
-          redirectSignIn: ['http://localhost:5173/auth/callback'],
-          redirectSignOut: ['http://localhost:5173/login'],
+          redirectSignIn: ['https://dental-ai-web-beta.vercel.app/auth/callback', 'http://localhost:5173/auth/callback'],
+          redirectSignOut: ['https://dental-ai-web-beta.vercel.app/login', 'http://localhost:5173/login'],
           responseType: 'code',
           providers: ['Google']
         }
@@ -44,7 +44,9 @@ export const awsConfig = {
 export const cognitoOAuthConfig = {
   domain: 'dental-ai-app.auth.eu-north-1.amazoncognito.com', // Cognito domain'inizi buraya yazın
   clientId: '37q6ca4cj7s4mjk16r8dgq57u4',
-  redirectUri: 'http://localhost:5173/auth/callback',
+  redirectUri: typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+    ? 'https://dental-ai-web-beta.vercel.app/auth/callback'
+    : 'http://localhost:5173/auth/callback',
   responseType: 'code',
   scope: 'email openid profile',
 };
