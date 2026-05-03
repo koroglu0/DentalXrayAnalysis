@@ -129,9 +129,57 @@ class DynamoDBClient:
                     }
                 ],
                 'BillingMode': 'PAY_PER_REQUEST'
+            },
+            {
+                'TableName': Config.FEEDBACKS_TABLE,
+                'KeySchema': [
+                    {'AttributeName': 'id', 'KeyType': 'HASH'}
+                ],
+                'AttributeDefinitions': [
+                    {'AttributeName': 'id', 'AttributeType': 'S'},
+                    {'AttributeName': 'patient_email', 'AttributeType': 'S'}
+                ],
+                'GlobalSecondaryIndexes': [
+                    {
+                        'IndexName': 'PatientEmailIndex',
+                        'KeySchema': [
+                            {'AttributeName': 'patient_email', 'KeyType': 'HASH'}
+                        ],
+                        'Projection': {'ProjectionType': 'ALL'}
+                    }
+                ],
+                'BillingMode': 'PAY_PER_REQUEST'
+            },
+            {
+                'TableName': Config.APPOINTMENTS_TABLE,
+                'KeySchema': [
+                    {'AttributeName': 'id', 'KeyType': 'HASH'}
+                ],
+                'AttributeDefinitions': [
+                    {'AttributeName': 'id', 'AttributeType': 'S'},
+                    {'AttributeName': 'patient_email', 'AttributeType': 'S'},
+                    {'AttributeName': 'doctor_email', 'AttributeType': 'S'}
+                ],
+                'GlobalSecondaryIndexes': [
+                    {
+                        'IndexName': 'PatientEmailIndex',
+                        'KeySchema': [
+                            {'AttributeName': 'patient_email', 'KeyType': 'HASH'}
+                        ],
+                        'Projection': {'ProjectionType': 'ALL'}
+                    },
+                    {
+                        'IndexName': 'DoctorEmailIndex',
+                        'KeySchema': [
+                            {'AttributeName': 'doctor_email', 'KeyType': 'HASH'}
+                        ],
+                        'Projection': {'ProjectionType': 'ALL'}
+                    }
+                ],
+                'BillingMode': 'PAY_PER_REQUEST'
             }
         ]
-        
+
         existing_tables = self._client.list_tables()['TableNames']
         
         for table_config in tables:

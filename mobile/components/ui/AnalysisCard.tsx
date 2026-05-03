@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Badge } from './Badge';
 
@@ -9,9 +9,10 @@ interface AnalysisCardProps {
   findings: string[];
   totalFindings: number;
   status: string;
+  imageUrl?: string;
 }
 
-export function AnalysisCard({ id, filename, date, findings, totalFindings, status }: AnalysisCardProps) {
+export function AnalysisCard({ id, filename, date, findings, totalFindings, status, imageUrl }: AnalysisCardProps) {
   const displayFindings = findings.slice(0, 2);
   const extra = findings.length - 2;
 
@@ -22,9 +23,17 @@ export function AnalysisCard({ id, filename, date, findings, totalFindings, stat
       onPress={() => router.push({ pathname: '/(doctor)/result', params: { analysisId: id } })}
       className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-3"
     >
-      {/* Thumbnail placeholder */}
-      <View className="w-full h-36 rounded-xl bg-slate-100 items-center justify-center mb-3">
-        <Text className="text-slate-400 text-3xl">🦷</Text>
+      {/* Thumbnail */}
+      <View className="w-full h-36 rounded-xl bg-slate-100 overflow-hidden items-center justify-center mb-3">
+        {imageUrl ? (
+          <Image
+            source={{ uri: imageUrl }}
+            style={{ width: '100%', height: '100%' }}
+            resizeMode="cover"
+          />
+        ) : (
+          <Text className="text-slate-400 text-3xl">🦷</Text>
+        )}
       </View>
 
       <Text className="font-bold text-slate-900 text-sm mb-0.5" numberOfLines={1}>{filename}</Text>

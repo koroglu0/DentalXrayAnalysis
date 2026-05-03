@@ -8,6 +8,8 @@ import { useAuth } from '../../src/context/AuthContext';
 import apiClient from '../../src/api/client';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 
 interface Organization { id: string; name: string; type: string; }
 interface Doctor { email: string; name: string; specialization?: string; }
@@ -23,10 +25,17 @@ export default function PatientHomeScreen() {
   const [isSending, setIsSending] = useState(false);
   const [step, setStep] = useState<'org' | 'doctor' | 'file' | 'done'>('org');
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     fetchOrganizations();
   }, []);
+
+  useFocusEffect(useCallback(() => {
+    apiClient.get('/api/feedbacks/unread-count')
+      .then((res) => setUnreadCount(res.data.unread_count || 0))
+      .catch(() => {});
+  }, []));
 
   const fetchOrganizations = async () => {
     try {
@@ -138,6 +147,27 @@ export default function PatientHomeScreen() {
             <Text className="text-slate-600 text-sm">Çıkış</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Bildirim Banner */}
+        {unreadCount > 0 && (
+          <TouchableOpacity
+            onPress={() => router.push('/(patient)/notifications')}
+            className="bg-cyan-500 rounded-2xl p-4 flex-row items-center justify-between mb-5"
+          >
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 bg-white/20 rounded-xl items-center justify-center">
+                <Text className="text-xl">🔔</Text>
+              </View>
+              <View>
+                <Text className="text-white font-bold text-sm">
+                  {unreadCount} yeni doktor geri bildirimi
+                </Text>
+                <Text className="text-white/80 text-xs">Randevu almak için tıklayın</Text>
+              </View>
+            </View>
+            <Text className="text-white text-lg">›</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Adım 1: Klinik Seçimi */}
         <View className="bg-white rounded-2xl p-4 border border-slate-100 mb-4">

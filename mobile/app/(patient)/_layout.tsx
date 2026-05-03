@@ -20,6 +20,20 @@ export default function PatientLayout() {
         }}
       />
       <Tabs.Screen
+        name="notifications"
+        options={{
+          title: 'Bildirimler',
+          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>🔔</Text>,
+        }}
+      />
+      <Tabs.Screen
+        name="appointments"
+        options={{
+          title: 'Randevular',
+          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>📅</Text>,
+        }}
+      />
+      <Tabs.Screen
         name="history"
         options={{
           title: 'Geçmiş',
@@ -33,6 +47,7 @@ export default function PatientLayout() {
           tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👤</Text>,
         }}
       />
+      <Tabs.Screen name="feedback-detail" options={{ href: null }} />
     </Tabs>
   );
 }

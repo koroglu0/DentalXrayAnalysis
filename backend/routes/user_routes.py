@@ -72,26 +72,36 @@ def get_user_by_id(current_user, user_id):
         return jsonify({'error': 'Kullanıcı alınamadı'}), 500
 
 @user_bp.route('/users/<user_id>', methods=['PUT'])
-@role_required('admin')
+@token_required
 def update_user(current_user, user_id):
     """Kullanıcı bilgilerini güncelle"""
     try:
+        requester_email = current_user.get('email')
+        requester_role = current_user.get('role')
+
+        # Kullanıcı sadece kendi profilini güncelleyebilir; admin herkesi güncelleyebilir
+        if requester_role != 'admin' and requester_email != user_id:
+            return jsonify({'error': 'Yetkiniz yok'}), 403
+
         data = request.get_json()
-        
-        # Güncellenebilir alanlar
+
+        # Admin olmayan kullanıcılar sadece name ve phone'u değiştirebilir
         update_data = {}
         if 'name' in data:
             update_data['name'] = data['name']
-        if 'role' in data:
-            update_data['role'] = data['role']
-        if 'organization_id' in data:
-            update_data['organization_id'] = data['organization_id']
-        if 'specialization' in data:
-            update_data['specialization'] = data['specialization']
         if 'phone' in data:
             update_data['phone'] = data['phone']
-        if 'status' in data:
-            update_data['status'] = data['status']
+
+        # Yalnızca admin'e özel alanlar
+        if requester_role == 'admin':
+            if 'role' in data:
+                update_data['role'] = data['role']
+            if 'organization_id' in data:
+                update_data['organization_id'] = data['organization_id']
+            if 'specialization' in data:
+                update_data['specialization'] = data['specialization']
+            if 'status' in data:
+                update_data['status'] = data['status']
         
         user = UserService.update_user(user_id, **update_data)
         

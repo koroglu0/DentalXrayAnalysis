@@ -136,11 +136,11 @@ def get_analysis(current_user, analysis_id):
         if not analysis:
             return jsonify({'error': 'Analiz bulunamadı'}), 404
         
-        # Kullanıcı kendi analizini veya admin tüm analizleri görebilir
+        # Admin ve doktorlar tüm analizleri, hastalar sadece kendi analizlerini görebilir
         user_email = current_user['email']
         user_role = current_user.get('role', 'patient')
         
-        if user_role != 'admin' and analysis.get('user_email') != user_email:
+        if user_role == 'patient' and analysis.get('user_email') != user_email:
             return jsonify({'error': 'Yetkiniz yok'}), 403
 
         # Pre-signed URL ekle (eski lokal yolları temizle)

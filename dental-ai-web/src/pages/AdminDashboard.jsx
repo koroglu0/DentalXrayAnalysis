@@ -51,16 +51,17 @@ export default function AdminDashboard() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const [patientsRes, orgsRes, historyRes, usersStatsRes] = await Promise.all([
-        fetch(`${config.apiBaseUrl}/api/patients`, { headers }),
+      const [usersRes, orgsRes, historyRes, usersStatsRes] = await Promise.all([
+        fetch(`${config.apiBaseUrl}/api/users`, { headers }),
         fetch(`${config.apiBaseUrl}/api/organizations`, { headers }),
         fetch(`${config.apiBaseUrl}/api/history`, { headers }),
         fetch(`${config.apiBaseUrl}/api/users/stats`, { headers }),
       ]);
 
-      if (patientsRes.ok) {
-        const patientsData = await patientsRes.json();
-        setPatients(patientsData.patients || []);
+      if (usersRes.ok) {
+        const usersData = await usersRes.json();
+        const patientList = (usersData.users || []).filter(u => u.role === 'patient');
+        setPatients(patientList);
       }
 
       if (orgsRes.ok) {

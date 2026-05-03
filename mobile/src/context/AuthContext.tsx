@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import * as Linking from 'expo-linking';
 import apiClient from '../api/client';
 import { config } from '../config';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export type UserRole = 'admin' | 'doctor' | 'patient';
 
@@ -21,9 +25,12 @@ interface AuthContextType {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  completeGoogleProfile: (role: string, password?: string, inviteCode?: string, specialization?: string) => Promise<void>;
   register: (data: RegisterData) => Promise<{ requiresVerification: boolean }>;
   confirmEmail: (email: string, code: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (data: Partial<Pick<User, 'name' | 'phone'>>) => Promise<void>;
 }
 
 export interface RegisterData {
@@ -82,6 +89,106 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     else router.replace('/(patient)');
   };
 
+  const loginWithGoogle = async () => {
+    // Linking.createURL üretilen URI:
+    // Expo Go'da  → exp://IP:PORT/--/auth/callback  (Expo Go'da kayıtlı scheme)
+    // Dev build'de → dental-ai://auth/callback
+    const redirectUri = Linking.createURL('auth/callback');
+
+    console.log('[Google Login] Redirect URI:', redirectUri);
+
+    // Android Chrome Custom Tab'ı önceden ısıt — sonraki açılışlarda donmayı önler
+    try { await WebBrowser.warmUpAsync(); } catch {}
+
+    const cognitoUrl =
+      'https://dental-ai-app.auth.eu-north-1.amazoncognito.com/oauth2/authorize' +
+      '?identity_provider=Google' +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      '&response_type=code' +
+      '&client_id=37q6ca4cj7s4mjk16r8dgq57u4' +
+      '&scope=email%20openid%20profile';
+
+    let result: WebBrowser.WebBrowserAuthSessionResult;
+    try {
+      result = await WebBrowser.openAuthSessionAsync(cognitoUrl, redirectUri, {
+        showInRecents: false,
+      });
+    } finally {
+      // Her durumda Custom Tab bağlantısını serbest bırak — sonraki çağrı donmasın
+      try { await WebBrowser.coolDownAsync(); } catch {}
+    }
+
+    if (result.type !== 'success' || !result.url) {
+      if (result.type === 'cancel' || result.type === 'dismiss') return;
+      throw new Error('Google ile giriş iptal edildi veya başarısız oldu');
+    }
+
+    const match = result.url.match(/[?&]code=([^&]+)/);
+    const code = match ? decodeURIComponent(match[1]) : null;
+    if (!code) throw new Error('Yetki kodu alınamadı');
+
+    let resData: any;
+    try {
+      const response = await apiClient.post('/api/cognito-callback', {
+        code,
+        redirect_uri: redirectUri,
+      });
+      resData = response.data;
+    } catch (apiErr: any) {
+      // Backend hatası — auth/callback ekranındaysak login'e geri dön
+      router.replace('/(auth)/login');
+      throw apiErr;
+    }
+
+    const accessToken = resData.access_token || resData.token;
+    await AsyncStorage.setItem(config.tokenKey, accessToken);
+    if (resData.id_token) await AsyncStorage.setItem(config.idTokenKey, resData.id_token);
+    if (resData.refresh_token) await AsyncStorage.setItem(config.refreshTokenKey, resData.refresh_token);
+    await AsyncStorage.setItem(config.userKey, JSON.stringify(resData.user));
+
+    // YENİ kullanıcıysa profil tamamlama ekranına yönlendir (henüz setUser çağrılmıyor)
+    if (resData.is_new_user) {
+      setTimeout(() => router.replace('/(auth)/complete-profile'), 350);
+      return;
+    }
+
+    setToken(accessToken);
+    setUser(resData.user);
+
+    // Browser kapanma animasyonu bitmeden router.replace çağrılırsa
+    // Android'de siyah ekran oluşuyor — kısa gecikme ile önle
+    const role: UserRole = resData.user?.role;
+    setTimeout(() => {
+      if (role === 'admin') router.replace('/(admin)');
+      else if (role === 'doctor') router.replace('/(doctor)');
+      else router.replace('/(patient)');
+    }, 350);
+  };
+
+  const completeGoogleProfile = async (
+    role: string,
+    password?: string,
+    inviteCode?: string,
+    specialization?: string
+  ) => {
+    const response = await apiClient.post('/api/complete-google-profile', {
+      role,
+      password: password || undefined,
+      invite_code: inviteCode || undefined,
+      specialization: specialization || undefined,
+    });
+    const userData = response.data.user;
+    await AsyncStorage.setItem(config.userKey, JSON.stringify(userData));
+    const savedToken = await AsyncStorage.getItem(config.tokenKey);
+    setToken(savedToken);
+    setUser(userData);
+    setTimeout(() => {
+      if (userData.role === 'admin') router.replace('/(admin)');
+      else if (userData.role === 'doctor') router.replace('/(doctor)');
+      else router.replace('/(patient)');
+    }, 350);
+  };
+
   const register = async (data: RegisterData) => {
     const response = await apiClient.post('/api/register', data);
     return { requiresVerification: response.data.requires_verification ?? true };
@@ -103,8 +210,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.replace('/(auth)/login');
   };
 
+  const updateUser = async (data: Partial<Pick<User, 'name' | 'phone'>>) => {
+    if (!user) throw new Error('Oturum açık değil');
+    const response = await apiClient.put(`/api/users/${user.email}`, data);
+    const updated = { ...user, ...data };
+    await AsyncStorage.setItem(config.userKey, JSON.stringify(updated));
+    setUser(updated);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, confirmEmail, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, loginWithGoogle, completeGoogleProfile, register, confirmEmail, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

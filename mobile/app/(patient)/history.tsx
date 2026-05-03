@@ -8,9 +8,10 @@ interface Analysis {
   id: string;
   filename: string;
   date: string;
-  findings: string[];
+  findings: any[];
   total_findings: number;
   status: string;
+  image_url?: string;
 }
 
 export default function PatientHistoryScreen() {
@@ -77,9 +78,10 @@ export default function PatientHistoryScreen() {
               id={analysis.id}
               filename={analysis.filename}
               date={analysis.date}
-              findings={analysis.findings || []}
+              findings={(analysis.findings || []).map((f: any) => f?.name || f).filter(Boolean)}
               totalFindings={analysis.total_findings || 0}
               status={analysis.status}
+              imageUrl={analysis.image_url}
             />
           ))
         )}

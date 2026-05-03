@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cognitoOAuthConfig } from '../aws-config';
 import { config } from '../config';
@@ -8,8 +8,13 @@ export default function AuthCallback() {
   const [searchParams] = useSearchParams();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const calledRef = useRef(false);
 
   useEffect(() => {
+    // React StrictMode'da double-invoke'u önle (authorization code tek kullanımlık)
+    if (calledRef.current) return;
+    calledRef.current = true;
+
     const handleCallback = async () => {
       try {
         // URL'den authorization code'u al
@@ -55,6 +60,12 @@ export default function AuthCallback() {
           localStorage.setItem('user', JSON.stringify(data.user));
 
           console.log('✅ Login successful:', data.user);
+
+          // Yeni kullanıcıysa profil tamamlama ekranına yönlendir
+          if (data.is_new_user) {
+            navigate('/complete-profile');
+            return;
+          }
 
           // Rol bazlı yönlendirme
           const userRole = data.user?.role;

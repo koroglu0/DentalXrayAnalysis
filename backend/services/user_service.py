@@ -39,6 +39,8 @@ class UserService:
         # Cognito sub ID varsa ekle
         if 'cognito_sub' in kwargs:
             user_data['cognito_sub'] = kwargs['cognito_sub']
+            # Google ile oluşturulan hesap profil tamamlanmamış başlar
+            user_data['google_profile_completed'] = False
         
         # Password hash sadece Cognito kullanılmadığında
         if password_hash:
@@ -115,6 +117,24 @@ class UserService:
         return None
     
     @staticmethod
+    def get_user_by_google_sub(google_sub):
+        """Google federated Cognito sub ile kullanıcı bul"""
+        try:
+            table = dynamodb_client.dynamodb.Table(Config.USERS_TABLE)
+            response = table.scan(
+                FilterExpression='google_cognito_sub = :gsub',
+                ExpressionAttributeValues={':gsub': google_sub}
+            )
+            if response.get('Items'):
+                user_data = response['Items'][0]
+                user_data.pop('password_hash', None)
+                return user_data
+            return None
+        except Exception as e:
+            print(f"DynamoDB get_user_by_google_sub error: {e}")
+            return None
+
+    @staticmethod
     def get_user_by_cognito_sub(cognito_sub):
         """Cognito sub ID ile kullanıcı bilgilerini getir"""
         try:
@@ -139,8 +159,8 @@ class UserService:
             return None
     
     @staticmethod
-    def update_user(email, updates):
-        """Kullanıcı bilgilerini güncelle"""
+    def _update_user_fields(email, updates):
+        """Kullanıcı alanlarını doğrudan email key ile güncelle"""
         # DynamoDB'de güncelle
         table = dynamodb_client.dynamodb.Table(Config.USERS_TABLE)
         
@@ -257,13 +277,16 @@ class UserService:
         try:
             update_expr_parts = []
             expr_attr_values = {}
+            expr_attr_names = {}
             
             if 'name' in kwargs:
-                update_expr_parts.append('name = :name')
+                update_expr_parts.append('#n = :name')
                 expr_attr_values[':name'] = kwargs['name']
+                expr_attr_names['#n'] = 'name'
             if 'role' in kwargs:
                 update_expr_parts.append('#r = :role')
                 expr_attr_values[':role'] = kwargs['role']
+                expr_attr_names['#r'] = 'role'
             if 'organization_id' in kwargs:
                 update_expr_parts.append('organization_id = :org_id')
                 expr_attr_values[':org_id'] = kwargs['organization_id']
@@ -276,19 +299,23 @@ class UserService:
             if 'status' in kwargs:
                 update_expr_parts.append('#s = :status')
                 expr_attr_values[':status'] = kwargs['status']
+                expr_attr_names['#s'] = 'status'
             
             update_expr_parts.append('updated_at = :updated_at')
             expr_attr_values[':updated_at'] = datetime.now().isoformat()
             
             update_expr = 'SET ' + ', '.join(update_expr_parts)
             
-            response = table.update_item(
-                Key={'email': email},
-                UpdateExpression=update_expr,
-                ExpressionAttributeNames={'#r': 'role', '#s': 'status'} if 'role' in kwargs or 'status' in kwargs else None,
-                ExpressionAttributeValues=expr_attr_values,
-                ReturnValues='ALL_NEW'
-            )
+            update_kwargs = {
+                'Key': {'email': email},
+                'UpdateExpression': update_expr,
+                'ExpressionAttributeValues': expr_attr_values,
+                'ReturnValues': 'ALL_NEW'
+            }
+            if expr_attr_names:
+                update_kwargs['ExpressionAttributeNames'] = expr_attr_names
+            
+            response = table.update_item(**update_kwargs)
             
             return response.get('Attributes')
         except Exception as e:

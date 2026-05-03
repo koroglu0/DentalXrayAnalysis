@@ -807,7 +807,7 @@ export default function ResultPage() {
                   onMouseUp={handleMouseUp}
                   onMouseLeave={handleMouseLeave}
                 >
-                  {imageUrl && (
+                  {imageUrl ? (
                     <div 
                       className="absolute inset-0 flex items-center justify-center p-4"
                       style={{
@@ -829,6 +829,12 @@ export default function ResultPage() {
                           style={{ display: showMarkers ? 'block' : 'none' }}
                         />
                       </div>
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-slate-400 dark:text-slate-600">
+                      <span className="material-symbols-outlined text-6xl">hide_image</span>
+                      <p className="text-sm font-medium">Görsel mevcut değil</p>
+                      <p className="text-xs text-center max-w-xs">Bu analiz S3 entegrasyonundan önce yapıldığı için görsel artık erişilebilir değil.</p>
                     </div>
                   )}
                   

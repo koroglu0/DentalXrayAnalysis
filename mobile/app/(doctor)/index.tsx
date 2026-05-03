@@ -122,6 +122,22 @@ export default function DoctorDashboardScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
+            onPress={() => router.push('/(doctor)/patients')}
+            className="bg-white rounded-2xl p-4 flex-row items-center justify-between border border-slate-100 shadow-sm"
+          >
+            <View className="flex-row items-center gap-3">
+              <View className="w-10 h-10 bg-blue-50 rounded-xl items-center justify-center">
+                <Text className="text-xl">👥</Text>
+              </View>
+              <View>
+                <Text className="font-semibold text-slate-900 text-sm">Hastalar</Text>
+                <Text className="text-slate-400 text-xs">Organizasyon hasta listesi</Text>
+              </View>
+            </View>
+            <Text className="text-slate-400">›</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             onPress={() => router.push('/(doctor)/history')}
             className="bg-white rounded-2xl p-4 flex-row items-center justify-between border border-slate-100 shadow-sm"
           >

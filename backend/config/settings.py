@@ -30,6 +30,9 @@ class Config:
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
     GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
     
+    # Admin invite code (Google ile kayıt sırasında admin rolü için)
+    ADMIN_INVITE_CODE = os.getenv('ADMIN_INVITE_CODE', 'DENTAL-ADMIN-2024')
+    
     # S3 Configuration
     S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', 'dental-ai-xrays')
 
@@ -39,6 +42,8 @@ class Config:
     PATIENTS_TABLE = 'DentalAI_Patients'
     ORGANIZATIONS_TABLE = 'DentalAI_Organizations'
     NOTES_TABLE = 'DentalAI_Notes'
+    FEEDBACKS_TABLE = 'DentalAI_Feedbacks'
+    APPOINTMENTS_TABLE = 'DentalAI_Appointments'
     
     # Paths (only for uploads)
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

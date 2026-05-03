@@ -34,6 +34,20 @@ export default function DoctorLayout() {
         }}
       />
       <Tabs.Screen
+        name="appointments"
+        options={{
+          title: 'Randevular',
+          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>📅</Text>,
+        }}
+      />
+      <Tabs.Screen
+        name="patients"
+        options={{
+          title: 'Hastalar',
+          tabBarIcon: ({ color }) => <Text style={{ color, fontSize: 20 }}>👥</Text>,
+        }}
+      />
+      <Tabs.Screen
         name="result"
         options={{
           href: null, // Tab bar'da görünmez, sadece navigate edilir

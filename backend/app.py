@@ -13,6 +13,8 @@ from routes.analysis_routes import analysis_bp
 from routes.organization_routes import organization_bp
 from routes.note_routes import note_bp
 from routes.user_routes import user_bp
+from routes.feedback_routes import feedback_bp
+from routes.appointment_routes import appointment_bp
 
 def create_app(config_class=Config):
     """Flask uygulaması oluştur"""
@@ -31,6 +33,8 @@ def create_app(config_class=Config):
     app.register_blueprint(organization_bp, url_prefix='/api')
     app.register_blueprint(note_bp, url_prefix='/api')
     app.register_blueprint(user_bp, url_prefix='/api')
+    app.register_blueprint(feedback_bp, url_prefix='/api')
+    app.register_blueprint(appointment_bp, url_prefix='/api')
     
     @app.route('/api/health')
     def health_check():

@@ -9,17 +9,18 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useAuth } from '../../src/context/AuthContext';
 import { StatusBar } from 'expo-status-bar';
 
 export default function LoginScreen() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -35,6 +36,19 @@ export default function LoginScreen() {
       setError(msg);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setGoogleLoading(true);
+    try {
+      await loginWithGoogle();
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || err?.message || 'Google ile giriş başarısız oldu.';
+      setError(msg);
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -95,7 +109,9 @@ export default function LoginScreen() {
           {/* Şifre */}
           <View className="flex-row items-center justify-between mb-2">
             <Text className="text-sm font-medium text-slate-700">Şifre</Text>
-            <Text className="text-sm font-semibold text-cyan-500">Şifremi Unuttum?</Text>
+            <TouchableOpacity onPress={() => router.push('/(auth)/forgot-password')}>
+              <Text className="text-sm font-semibold text-cyan-500">Şifremi Unuttum?</Text>
+            </TouchableOpacity>
           </View>
           <View className="flex-row items-center border border-slate-200 bg-slate-50 rounded-xl px-4 mb-6">
             <TextInput
@@ -138,6 +154,23 @@ export default function LoginScreen() {
             <Text className="mx-4 text-slate-400 text-xs font-medium">VEYA</Text>
             <View className="flex-1 h-px bg-slate-200" />
           </View>
+
+          {/* Google ile Giriş */}
+          <TouchableOpacity
+            onPress={handleGoogleLogin}
+            disabled={googleLoading || loading}
+            className="flex-row items-center justify-center border border-slate-200 rounded-2xl py-3.5 mb-6 bg-white"
+            style={{ elevation: 1, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3 }}
+          >
+            {googleLoading ? (
+              <ActivityIndicator color="#64748b" size="small" />
+            ) : (
+              <>
+                <Text className="text-lg mr-2">🔵</Text>
+                <Text className="text-slate-700 font-semibold text-sm">Google ile Devam Et</Text>
+              </>
+            )}
+          </TouchableOpacity>
 
           {/* Kayıt Ol */}
           <View className="flex-row justify-center mb-8">

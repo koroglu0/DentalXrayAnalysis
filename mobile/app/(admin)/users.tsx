@@ -14,7 +14,7 @@ interface User {
   email: string;
   name: string;
   role: 'admin' | 'doctor' | 'patient';
-  organization?: string;
+  organization_id?: string;
   status?: 'active' | 'inactive';
   created_at?: string;
   specialization?: string;
@@ -117,7 +117,7 @@ export default function AdminUsersScreen() {
 
   const handleToggle = async (user: User) => {
     try {
-      await apiClient.post(`/api/users/${user.id}/toggle-status`);
+      await apiClient.post(`/api/users/${user.email}/toggle-status`);
       fetchData();
     } catch {
       Alert.alert('Hata', 'Durum değiştirilemedi');
@@ -135,7 +135,7 @@ export default function AdminUsersScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await apiClient.delete(`/api/users/${user.id}`);
+              await apiClient.delete(`/api/users/${user.email}`);
               fetchData();
             } catch {
               Alert.alert('Hata', 'Silinemedi');
@@ -242,7 +242,7 @@ export default function AdminUsersScreen() {
               name={user.name}
               email={user.email}
               role={user.role}
-              organization={user.organization}
+              organization={organizations.find(o => o.id === user.organization_id)?.name}
               status={user.status ?? 'active'}
               registeredAt={user.created_at?.slice(0, 10)}
               onEdit={() => { setSelectedUser(user); setShowEditModal(true); }}

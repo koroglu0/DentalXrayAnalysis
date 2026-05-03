@@ -27,7 +27,6 @@
         "backgroundColor": "#13a4ec"
       },
       "package": "com.dentalai.app",
-      "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {

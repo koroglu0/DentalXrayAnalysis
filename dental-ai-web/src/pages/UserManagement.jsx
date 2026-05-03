@@ -190,12 +190,6 @@ export default function UserManagement() {
   };
 
   const handleToggleStatus = async (userId, currentStatus) => {
-    const newStatus = currentStatus === 'active' ? 'Pasif' : 'Aktif';
-    
-    if (!confirm(`Kullanıcıyı ${newStatus} yapmak istediğinizden emin misiniz?`)) {
-      return;
-    }
-
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${config.apiBaseUrl}/api/users/${userId}/toggle-status`, {
@@ -219,10 +213,6 @@ export default function UserManagement() {
   };
 
   const handleDeleteUser = async (userId, userName) => {
-    if (!confirm(`"${userName}" kullanıcısını silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz.`)) {
-      return;
-    }
-
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(`${config.apiBaseUrl}/api/users/${userId}`, {
