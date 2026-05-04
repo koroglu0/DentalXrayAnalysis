@@ -53,6 +53,20 @@ class S3Service:
         except ClientError as e:
             raise Exception(f"S3 yükleme hatası: {e}") from e
 
+    def download_xray(self, s3_key: str, local_path: str) -> bool:
+        """
+        S3'teki röntgeni yerel dosyaya indir.
+
+        Returns:
+            bool: Başarılıysa True
+        """
+        try:
+            self.client.download_file(self.bucket, s3_key, local_path)
+            return True
+        except ClientError as e:
+            print(f"S3 indirme hatası ({s3_key}): {e}")
+            return False
+
     def generate_presigned_url(self, s3_key: str, expiry_seconds: int = 3600) -> str:
         """
         Geçici erişim URL'i oluştur (varsayılan 1 saat).

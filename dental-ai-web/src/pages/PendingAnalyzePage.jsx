@@ -2,8 +2,8 @@
  * Doktorun bekleyen hasta röntgenini analiz ettiği sayfa.
  * DoctorDashboard'dan state ile gelen pendingData'yı alır:
  *   { id, filename, patient_note, patient_email, image_s3_key, image_url }
- * S3'ten görüntüyü indirir, /api/analyze'a gönderir (analysis_id ile),
- * sonucu ResultPage'e { result, imageUrl, analysisId, patientEmail } ile taşır.
+ * Önizleme S3 presigned URL ile <img> üzerinden yapılır (CORS gerekmez).
+ * Analiz: /api/analyze-pending'e analysis_id gönderilir, backend S3'ten okur.
  */
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -16,7 +16,6 @@ export default function PendingAnalyzePage() {
 
   const [status, setStatus] = useState('loading'); // loading | ready | analyzing | error
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [fileObj, setFileObj] = useState(null);
   const [progress, setProgress] = useState(0);
   const [errorMsg, setErrorMsg] = useState('');
   const intervalRef = useRef(null);
@@ -33,10 +32,10 @@ export default function PendingAnalyzePage() {
       navigate('/doctor');
       return;
     }
-    loadImage();
+    loadPreview();
   }, []);
 
-  const loadImage = async () => {
+  const loadPreview = async () => {
     setStatus('loading');
     try {
       // Zaten bir image_url geliyorsa kullan, yoksa S3 key'den al
@@ -54,20 +53,8 @@ export default function PendingAnalyzePage() {
 
       if (!presignedUrl) throw new Error('Görüntü URL\'si yok');
 
-      // Görüntüyü indir ve File nesnesine çevir
-      const imgRes = await fetch(presignedUrl);
-      if (!imgRes.ok) throw new Error('Görüntü indirilemedi');
-      const blob = await imgRes.blob();
-      const file = new File([blob], pendingData.filename || 'xray.jpg', {
-        type: blob.type || 'image/jpeg',
-      });
-
-      // Preview için data URL
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewUrl(reader.result);
-      reader.readAsDataURL(blob);
-
-      setFileObj(file);
+      // <img src> CORS gerektirmez — direkt presigned URL'i göster.
+      setPreviewUrl(presignedUrl);
       setStatus('ready');
     } catch (err) {
       setErrorMsg(err.message || 'Görüntü yüklenemedi');
@@ -76,7 +63,7 @@ export default function PendingAnalyzePage() {
   };
 
   const handleAnalyze = async () => {
-    if (!fileObj) return;
+    if (!pendingData?.id) return;
     setStatus('analyzing');
     setProgress(0);
 
@@ -85,14 +72,13 @@ export default function PendingAnalyzePage() {
     }, 300);
 
     try {
-      const formData = new FormData();
-      formData.append('file', fileObj);
-      formData.append('analysis_id', pendingData.id);
-
-      const res = await fetch(`${config.apiBaseUrl}/api/analyze`, {
+      const res = await fetch(`${config.apiBaseUrl}/api/analyze-pending`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ analysis_id: pendingData.id }),
       });
 
       clearInterval(intervalRef.current);
@@ -109,7 +95,7 @@ export default function PendingAnalyzePage() {
         navigate('/result', {
           state: {
             result,
-            imageUrl: previewUrl,
+            imageUrl: result.image_url || previewUrl,
             analysisId: pendingData.id,
             patientEmail: pendingData.patient_email,
           },

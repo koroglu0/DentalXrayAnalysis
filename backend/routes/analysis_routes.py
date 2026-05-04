@@ -96,6 +96,82 @@ def analyze(current_user):
     except Exception as e:
         return jsonify({'error': f'Analiz hatası: {str(e)}'}), 500
 
+@analysis_bp.route('/analyze-pending', methods=['POST'])
+@role_required('doctor', 'admin')
+def analyze_pending(current_user):
+    """
+    Bekleyen (pending) bir analizi sunucu tarafında işle.
+    Frontend'in S3'ten görüntü indirmesi gerekmez (CORS sorunu olmaz).
+    Body: { "analysis_id": "..." }
+    """
+    try:
+        data = request.get_json(silent=True) or {}
+        analysis_id = data.get('analysis_id')
+        if not analysis_id:
+            return jsonify({'error': 'analysis_id gerekli'}), 400
+
+        analysis = AnalysisService.get_analysis_by_id(analysis_id)
+        if not analysis:
+            return jsonify({'error': 'Analiz bulunamadı'}), 404
+
+        if analysis.get('status') != 'pending':
+            return jsonify({'error': 'Bu analiz zaten işlenmiş'}), 400
+
+        s3_key = analysis.get('image_s3_key', '')
+        if not s3_key or not s3_key.startswith('xrays/'):
+            return jsonify({'error': 'Görüntü kaydı bulunamadı'}), 400
+
+        original_filename = analysis.get('filename') or 'xray.jpg'
+        ext = os.path.splitext(original_filename)[1] or '.jpg'
+
+        with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp:
+            tmp_path = tmp.name
+
+        try:
+            if not s3_service.download_xray(s3_key, tmp_path):
+                return jsonify({'error': 'Görüntü indirilemedi'}), 500
+
+            findings, dimensions = ai_service.process_image(tmp_path)
+            if findings is None:
+                return jsonify({'error': 'Görüntü analiz edilemedi'}), 500
+        finally:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+        results = {
+            'findings': findings,
+            'total_findings': len(findings),
+            'image_dimensions': dimensions
+        }
+
+        analysis_data = AnalysisService.update_analysis_with_results(
+            analysis_id=analysis_id,
+            doctor_email=current_user['email'],
+            results=results,
+            image_s3_key=s3_key
+        )
+
+        if not analysis_data:
+            return jsonify({'error': 'Analiz güncellenemedi'}), 500
+
+        image_url = s3_service.generate_presigned_url(s3_key)
+
+        return jsonify({
+            'message': 'Analiz tamamlandı',
+            'findings': findings,
+            'total_findings': len(findings),
+            'image_dimensions': dimensions,
+            'filename': original_filename,
+            'image_url': image_url,
+            'timestamp': analysis_data['timestamp']
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': f'Analiz hatası: {str(e)}'}), 500
+
+
 @analysis_bp.route('/history', methods=['GET'])
 @token_required
 def get_history(current_user):
